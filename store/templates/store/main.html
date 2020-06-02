@@ -5,9 +5,9 @@
 	<title>Ecom</title>
 
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1" />
-
+<!--css bootstrap	-->
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-
+<!-- here we must place our css under bootstrap so we overwrite it if needed-->
 	<link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
 
 	<script type="text/javascript">
@@ -29,6 +29,42 @@
 		    return cookieValue;
 		}
 		var csrftoken = getToken('csrftoken')
+
+		//look in the document if there is a cookie named cart
+		function getCookie(name) {
+		    // Split cookie string and get all individual name=value pairs in an array
+		    var cookieArr = document.cookie.split(";");
+
+		    // Loop through the array elements
+		    for(var i = 0; i < cookieArr.length; i++) {
+		        var cookiePair = cookieArr[i].split("=");
+
+		        /* Removing whitespace at the beginning of the cookie name
+		        and compare it with the given string */
+		        if(name == cookiePair[0].trim()) {
+		            // Decode the cookie value and return
+		            return decodeURIComponent(cookiePair[1]);
+		        }
+		    }
+
+		    // Return null if not found
+		    return null;
+		}
+		// the function above we r sure to take the same cookie and its content so we save the content of the cart for the user who is not logged in
+		//see if the cookie with the name cookie exits by calling the fct
+		var cart = JSON.parse(getCookie('cart'))
+		// if not defined then creat one
+		if (cart == undefined){
+			//make a dict
+			cart = {}
+			console.log('Cart Created!', cart)
+			//then add the dict to the document as a cookie to only our website by specifyin the domain and the path
+			//and we stringify the dict to add it to the docuement
+			//after when we process it with the fct js cart file we can make it jason object
+			document.cookie ='cart=' + JSON.stringify(cart) + ";domain=;path=/"
+		}
+		// else print the content of the cookie
+		console.log('Cart:', cart)
 
 	</script>
 
@@ -59,7 +95,7 @@
 	    </div>
 	  </div>
 	</nav>
-
+<!--	havin bootstrap we can use tag name container to contain stuff	-->
      <div class="container">
             <br>
             {% block content %}

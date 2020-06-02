@@ -8,10 +8,10 @@ for (i = 0; i < updateBtns.length; i++) {
 		console.log('USER:', user)
 
 		if (user == 'AnonymousUser'){
-			console.log('User is not authenticated')
+			addCookieItem(productId, action)
 
 		}else{
-			updateUserOrder(productId, action)
+		updateUserOrder(productId, action)
 		}
 	})
 }
@@ -34,10 +34,42 @@ function updateUserOrder(productId, action){
 			body:JSON.stringify({'productId':productId, 'action':action})
 		})
     //this is the respone after sending the data which is the promess turn it to jason
-		.then((response) => {
-		   return response.json();
-		})//reload the actual page after sendind data to the view
-		.then((data) => {
-		    location.reload()
-		});
+		.then((response) => {return response.json();})//reload the actual page after sendind data to the view
+
+		.then((data) => { location.reload()});}
+
+
+function addCookieItem(productId, action){
+		console.log('User is not authenticated')
+
+		if (action == 'add'){
+			if (cart[productId] == undefined){
+			/*
+			cart={1:{'quantity':1},
+						2:{'quantity':4},
+
+
+			}
+			*/
+
+			cart[productId] = {'quantity':1}
+
+			}else{
+				cart[productId]['quantity'] += 1
+			}
+		}
+
+		if (action == 'remove'){
+			cart[productId]['quantity'] -= 1
+
+			if (cart[productId]['quantity'] <= 0){
+				console.log('Item should be deleted')
+				delete cart[productId];
+			}
+		}
+		console.log('CART:', cart)
+		document.cookie ='cart=' + JSON.stringify(cart) + ";domain=;path=/"
+		// so to get the totall and show it in the cart icon
+		//not best way, we can use more javascript or rest apis
+		location.reload()
 }
