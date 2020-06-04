@@ -5,14 +5,34 @@ import datetime
 from .models import *
 from .utils import cookieCart,cartData,guestOrder
 
-# if producted deleted then check cart cuz it throws price error
+"""
+You specified order_item.quantity += 1, This is okay until 2 people click "Add to cart"
+at the same time or a user clicks very fast that the first request isn't finished,
+This is a race condition and should be avoided. Like this
+from django.db.models import F
+order_item.quantity = F('quantity') + 1
+
+email field
+"""
+
+def slider(request,pk):
+	data = cartData(request)
+	cartItems = data['cartItems']
+	order = data['order']
+	items = data['items']
+	product = Product.objects.get(id=pk)
+
+	categories=Category.objects.all()
+	context = {'product':product, 'cartItems':cartItems,'categories':categories}
+	return render(request, 'store/slider.html', context)
+
 def store(request,cat):
 	data = cartData(request)
 	cartItems = data['cartItems']
 	order = data['order']
 	items = data['items']
 	products = Product.objects.filter(category=cat)
-	#if category doesnt exits then show all categories
+	#if category doesnt exits then show all products
 	cat = Category.objects.filter(id=cat).count()
 	if cat == 0:
 		products=Product.objects.all()
@@ -27,7 +47,7 @@ def store2(request,cat,subcat):
 	order = data['order']
 	items = data['items']
 	products = Product.objects.filter(category=cat,sub_category=subcat)
-	#if category doesnt exits then show all categories
+	#if category doesnt exits then show all products
 	cat = Category.objects.filter(id=cat).count()
 	subcat =SubCategory.objects.filter(id=subcat).count()
 	if cat == 0 or subcat == 0:
@@ -43,6 +63,9 @@ def cart(request):
 	cartItems = data['cartItems']
 	order = data['order']
 	items = data['items']
+	for item in items:
+		print(item.product)
+
 	categories=Category.objects.all()
 
 
@@ -64,34 +87,28 @@ def updateItem(request):
 	data = json.loads(request.body)
 	productId = data['productId']
 	action = data['action']
+	val=data['val']
+	colorsize=data['colorsize']
 	print('Action:', action)
 	print('Product:', productId)
-
 	customer = request.user.customer
 	product = Product.objects.get(id=productId)
+	tcolorsize = TakenColorSize.objects.get(id=colorsize)
+
 	order, created = Order.objects.get_or_create(customer=customer, complete=False)
-
-	orderItem, created = OrderItem.objects.get_or_create(order=order, product=product)
-
-	"""
-	You specified order_item.quantity += 1, This is okay until 2 people click "Add to cart" at the same time or a user clicks very fast that the first request isn't finished, This is a race condition and should be avoided. Like this
-
-	from django.db.models import F
-
-	order_item.quantity = F('quantity') + 1
-	"""
-
+	#here add color size
+	orderItem, created = OrderItem.objects.get_or_create(order=order, product=product,color_size=tcolorsize)
 	if action == 'add':
-		orderItem.quantity = (orderItem.quantity + 1)
+		orderItem.quantity = (orderItem.quantity + int(val))
 	elif action == 'remove':
 		orderItem.quantity = (orderItem.quantity - 1)
-
 	orderItem.save()
-
 	if orderItem.quantity <= 0:
 		orderItem.delete()
-
 	return JsonResponse('Item was added', safe=False)
+
+
+
 
 def processOrder(request):
 	transaction_id = datetime.now().timestamp()
@@ -104,11 +121,10 @@ def processOrder(request):
 
 	total = float(data['form']['total'])
 	order.transaction_id = transaction_id
-	if total == order.get_cart_total:
+
+	if float(total) == float(order.get_cart_total):
 		order.complete = True
-	order.save()
-
-	if order.shipping == True:
-		ShippingAddress.objects.create(customer=customer,order=order,address=data['shipping']['address'],city=data['shipping']['city'],state=data['shipping']['state'],zipcode=data['shipping']['zipcode'],)
-
+		order.save()
+		if order.shipping == True:
+			ShippingAddress.objects.create(customer=customer,order=order,address=data['shipping']['address'],city=data['shipping']['city'],state=data['shipping']['state'],zipcode=data['shipping']['zipcode'],)
 	return JsonResponse('Payment submitted..', safe=False)

@@ -4,6 +4,15 @@ from django.dispatch import receiver
 from datetime import datetime, timedelta
 from django.db.models import Sum
 
+class Color(models.Model):
+    name=models.CharField(max_length=200,null=True)
+    def __str__(self):
+        return self.name
+
+class Size(models.Model):
+    name=models.CharField(max_length=200,null=True)
+    def __str__(self):
+        return self.name
 
 class Category(models.Model):
     name=models.CharField(max_length=200,null=True)
@@ -24,15 +33,18 @@ class Customer(models.Model):
     def __str__(self):
         return self.name
 
+
+
 class Product(models.Model):
     name=models.CharField(max_length=200,null=True)
-    color=models.CharField(max_length=50,null=True,blank=False)
-    size=models.CharField(max_length=50,null=True,blank=False)
+    color=models.ManyToManyField(Color,blank=True,through='TakenColorSize')
+    size=models.ManyToManyField(Size,blank=True,through='TakenColorSize')
     price=models.DecimalField(max_digits=5,decimal_places=2)
     digital=models.BooleanField(default=False,null=True,blank=False)
-    image=models.ImageField(null=True,blank=False)
     category=models.ForeignKey(Category,on_delete=models.CASCADE,null=True,blank=False)
     sub_category=models.ForeignKey(SubCategory,on_delete=models.CASCADE,null=True,blank=False)
+    description = models.TextField(null=True,blank=True)
+    featured = models.ImageField(null=True)
     GENDER_CHOICES = (
     ('none', 'none'),
     ('man', 'man'),
@@ -40,18 +52,43 @@ class Product(models.Model):
     ('kids', 'kids')  )# yeah that's not a gender but you could want to have this
     gender = models.CharField(max_length=30, choices=GENDER_CHOICES,null=True,blank=True)
 
-
     def __str__(self):
         return self.name
-    #this is a decorator to let us access this method as attribut
-    #rather than a function
     @property
     def imageURL(self):
         try:
-            url=self.image.url
+            url = self.featured.url
         except:
-            url=''
+            url = ''
+        print('URL:', url)
         return url
+
+class TakenColorSize(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    color = models.ForeignKey(Color, on_delete=models.CASCADE,blank=True,null=True)
+    size = models.ForeignKey(Size, on_delete=models.CASCADE,blank=True,null=True)
+    def __str__(self):
+        return str(self.id)
+
+
+
+
+class Image(models.Model):
+	product = models.ForeignKey(Product, on_delete=models.CASCADE)
+	name = models.CharField(max_length=200)
+	image = models.ImageField()
+
+	def __str__(self):
+		return self.name
+
+	@property
+	def imageURL(self):
+		try:
+			url = self.image.url
+		except:
+			url = ''
+		print('URL:', url)
+		return url
 
 class Order(models.Model):
     customer=models.ForeignKey(Customer,on_delete=models.SET_NULL,null=True,blank=False)
@@ -86,15 +123,18 @@ class Order(models.Model):
 
 
 class OrderItem(models.Model):
-    product=models.ForeignKey(Product,on_delete=models.SET_NULL,null=True,blank=False)
+    product=models.ForeignKey(Product,on_delete=models.CASCADE,null=True,blank=False)
     order=models.ForeignKey(Order,on_delete=models.SET_NULL,null=True,blank=False)
     quantity=models.IntegerField(default=0,null=True,blank=False)
     date_added=models.DateTimeField(auto_now_add=True)
+    color_size = models.ForeignKey(TakenColorSize, on_delete=models.CASCADE,blank=True,null=True)
+
     def __str__(self):
         return str(self.id)
     @property
     def get_total(self):
         return self.quantity*self.product.price
+
 
 class ShippingAddress(models.Model):
     customer=models.ForeignKey(Customer,on_delete=models.SET_NULL,null=True,blank=False)

@@ -6,7 +6,7 @@ urlpatterns=[
 
 path('<int:cat>',views.store,name='store'),
 path('<int:cat>/<int:subcat>/',views.store2,name='store2'),
-
+path('<int:pk>/description/',views.slider,name='slider'),
 path('cart/',views.cart,name='cart'),
 path('checkout/',views.checkout,name='checkout'),
 path('update_item/',views.updateItem,name='update_item'),
