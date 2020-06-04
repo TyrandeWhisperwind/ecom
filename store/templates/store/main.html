@@ -3,16 +3,14 @@
 <html>
 <head>
 	<title>Ecom</title>
-
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1" />
 <!--css bootstrap	-->
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
 <!-- here we must place our css under bootstrap so we overwrite it if needed-->
 	<link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
-
 	<script type="text/javascript">
 		var user = '{{request.user}}'
-
 		function getToken(name) {
 		    var cookieValue = null;
 		    if (document.cookie && document.cookie !== '') {
@@ -65,52 +63,69 @@
 		}
 		// else print the content of the cookie
 		console.log('Cart:', cart)
-
 	</script>
-
 </head>
 <body>
+		<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+							  <div class="container">
+									<a class="navbar-brand" href="{% url 'store' 0 %}">Ecom</a>
+									<ul class="navbar-nav mr-auto">
+										<li class="nav-item active">
+											<a class="nav-link" href="{% url 'store' 0 %}">Store <span class="sr-only">(current)</span></a>
+										</li>
+							    <div id="navbarContent" class="collapse navbar-collapse">
+							      <ul class="navbar-nav mr-auto">
+							        <!-- Level one dropdown -->
+							        <li class="nav-item dropdown">
+							          <a id="dropdownMenu1" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="nav-link dropdown-toggle">Categories</a>
 
-	<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-	  <a class="navbar-brand" href="{% url 'store' %}">Ecom</a>
-	  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-	    <span class="navbar-toggler-icon"></span>
-	  </button>
+												<ul aria-labelledby="dropdownMenu1" class="dropdown-menu border-0 shadow">
+							            <!-- Level two dropdown-->
+													{%for cat in categories%}
+														<div class=" dropright">
+							                    <a href="{% url 'store' cat.id %}" class="dropdown-item"  > {{cat}}{% if cat.subcategory_set.all.exists %} <i class="fa fa-angle-right"></i>	{%endif%}</a>
+																	{% if cat.subcategory_set.all.exists %}
+																	<div class="dropdown-menu">
+																		{%for subcat in cat.subcategory_set.all%}
+							                        <li><a class="dropdown-item"href="{% url 'store2' cat.id  subcat.id %}" >{{subcat}}</a></li>
+																			{%endfor%}
+							                    </div>
+																	{%endif%}
+							                </div>
+															{%endfor%}
+							          </ul>
+							        </li>
+							        <li class="nav-item"><a href="#" class="nav-link">About</a></li>
+							        <li class="nav-item"><a href="#" class="nav-link">Services</a></li>
+							        <li class="nav-item"><a href="#" class="nav-link">Contact</a></li>
+							      </ul>
+							    </div>
+							  </div>
+								<form class="form-inline my-2 my-lg-0 search" >
+											<input class="form-control mr-sm-2 " type="search" placeholder="Search" aria-label="Search">
+											<input class="btn btn-success " type="submit" id="search"  value="search"></input>
+								</form>
+								<div class="form-inline my-2 my-lg-0">
+									<a href="#"class="btn btn-warning">Login</a>
+									<a href="{% url 'cart' %}">
+										<img  id="cart-icon" src="{% static 'images/cart.png' %}">
+									</a>
+									<p id="cart-total">{{cartItems}}</p>
+								</div>
+		</nav>
 
-	  <div class="collapse navbar-collapse" id="navbarSupportedContent">
-	    <ul class="navbar-nav mr-auto">
-	      <li class="nav-item active">
-	        <a class="nav-link" href="{% url 'store' %}">Store <span class="sr-only">(current)</span></a>
-	      </li>
-
-	    </ul>
-	    <div class="form-inline my-2 my-lg-0">
-	     	<a href="#"class="btn btn-warning">Login</a>
-
-	     	<a href="{% url 'cart' %}">
-	    		<img  id="cart-icon" src="{% static 'images/cart.png' %}">
-	    	</a>
-	    	<p id="cart-total">{{cartItems}}</p>
-
-	    </div>
-	  </div>
-	</nav>
 <!--	havin bootstrap we can use tag name container to contain stuff	-->
      <div class="container">
             <br>
             {% block content %}
-
-
             {% endblock content %}
          </div>
 
 
 	<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
-
 	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
-
 	<script type="text/javascript" src="{% static 'js/cart.js' %}"></script>
+
 </body>
 </html>

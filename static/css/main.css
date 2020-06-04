@@ -50,6 +50,14 @@ h1,h2,h3,h4,h5,h6{
 	margin-top: 10px;
 }
 
+.search{
+	margin-right: 20px;
+}
+
+/* Show the dropdown menu on hover */
+.dropright:hover .dropdown-menu {display: block;}
+
+
 .btn{
 	border-radius: 0;
 }

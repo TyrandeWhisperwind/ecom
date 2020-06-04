@@ -4,6 +4,18 @@ from django.dispatch import receiver
 from datetime import datetime, timedelta
 from django.db.models import Sum
 
+
+class Category(models.Model):
+    name=models.CharField(max_length=200,null=True)
+    def __str__(self):
+        return self.name
+
+class SubCategory(models.Model):
+    name=models.CharField(max_length=200,null=True)
+    category=models.ForeignKey(Category,on_delete=models.CASCADE,null=True,blank=False)
+    def __str__(self):
+        return self.name
+
 class Customer(models.Model):
     user=models.OneToOneField(User,on_delete=models.CASCADE,null=True,blank=True)
     name=models.CharField(max_length=200,null=True)
@@ -14,9 +26,20 @@ class Customer(models.Model):
 
 class Product(models.Model):
     name=models.CharField(max_length=200,null=True)
+    color=models.CharField(max_length=50,null=True,blank=False)
+    size=models.CharField(max_length=50,null=True,blank=False)
     price=models.DecimalField(max_digits=5,decimal_places=2)
     digital=models.BooleanField(default=False,null=True,blank=False)
     image=models.ImageField(null=True,blank=False)
+    category=models.ForeignKey(Category,on_delete=models.CASCADE,null=True,blank=False)
+    sub_category=models.ForeignKey(SubCategory,on_delete=models.CASCADE,null=True,blank=False)
+    GENDER_CHOICES = (
+    ('none', 'none'),
+    ('man', 'man'),
+    ('woman', 'woman'),
+    ('kids', 'kids')  )# yeah that's not a gender but you could want to have this
+    gender = models.CharField(max_length=30, choices=GENDER_CHOICES,null=True,blank=True)
+
 
     def __str__(self):
         return self.name
@@ -83,4 +106,4 @@ class ShippingAddress(models.Model):
     date_added=models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.addess)
+        return str(self.address)
