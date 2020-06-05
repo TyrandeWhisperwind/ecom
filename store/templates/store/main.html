@@ -102,17 +102,35 @@
 							      </ul>
 							    </div>
 							  </div>
-								<form class="form-inline my-2 my-lg-0 search" >
+
+<!--
+								<form class="form-inline search" >
 											<input class="form-control mr-sm-2 " type="search" placeholder="Search" aria-label="Search">
 											<input class="btn btn-success " type="submit" id="search"  value="search"></input>
 								</form>
-								<div class="form-inline my-2 my-lg-0">
-									<a href="#"class="btn btn-warning">Login</a>
-									<a href="{% url 'cart' %}">
-										<img  id="cart-icon" src="{% static 'images/cart.png' %}">
-									</a>
+									-->
+
+
+					 {%if user.is_authenticated%}
+					 <div class="form-inline ">
+									 <!--  when submitting it ll make a post request to the url we did link to the view in paths of the acc app-->
+										 <form class="logout-link" action="{% url 'logout' %}" method="post">
+											 <!-- when ever we make a post request alwas add this token-->
+											 {%csrf_token%}
+											 <input class="btn btn-warning " type="submit" id="search"  value="Logout"></input>
+										 </form>
+										 <a href="{% url 'cart' %}"><img  id="cart-icon" src="{% static 'images/cart.png' %}"></a>
+		 								<p id="cart-total">{{cartItems}}</p>
+					</div>
+					 {%else%}
+						 <div class="form-inline">
+							 		<a href="{% url 'login' %}"class="btn btn-warning">Login</a>
+									<a href="{%url 'signup'%}"class="btn btn-success">Signup</a>
+									<a href="{% url 'cart' %}"><img  id="cart-icon" src="{% static 'images/cart.png' %}"></a>
 									<p id="cart-total">{{cartItems}}</p>
-								</div>
+							</div>
+					 {%endif%}
+
 		</nav>
 
 <!--	havin bootstrap we can use tag name container to contain stuff	-->

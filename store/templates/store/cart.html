@@ -37,8 +37,12 @@
 					<div style="flex:2"><img class="row-image" src="{{item.product.imageURL}}"></div>
 					<div style="flex:2"><p>{{item.product.name}}</p></div>
 					<div style="flex:1"><p>${{item.product.price}}</p></div>
-					<div style="flex:1"><p>{{item.color_size.color}} / {{item.color_size.size}}</p></div>
 
+					{%if user.is_authenticated%}
+					<div style="flex:1"><p>{{item.color_size.color}} / {{item.color_size.size}}</p></div>
+					 {%else%}
+					 <div style="flex:1"><p>{{item.product.color}} / {{item.product.size}}</p></div>
+ 					{%endif%}
 
 					<div style="flex:1">
 						<p class="quantity">{{item.quantity}}</p>
